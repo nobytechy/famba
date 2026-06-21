@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --brand: #0f766e;     /* teal-700 */
+  --brand-700: #115e59;
+  --accent: #f59e0b;    /* amber-500 */
+  --ink: #0f172a;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Leaflet tweaks */
+.leaflet-container { font: inherit; }
+.veh-marker {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 9999px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  border: 2px solid #fff;
+}
+
+/* Thin scrollbars */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+
+@keyframes pulse-dot { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+.live-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+/* Buttons should always feel clickable and distinct from label pills. */
+button:not(:disabled), a[role="button"] { cursor: pointer; }
+.btn-press:active { transform: scale(0.97); }
+
+/* Soft primary blend backdrops for the marketing site (no hard borders). */
+.blend-top    { background: linear-gradient(to bottom, rgba(15,118,110,0.06), #ffffff 60%); }
+.blend-bottom { background: linear-gradient(to top, rgba(15,118,110,0.06), #ffffff 60%); }
+.blend-soft   { background: linear-gradient(180deg, #ffffff 0%, rgba(15,118,110,0.05) 50%, #ffffff 100%); }
+
+@keyframes fade-up { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform:none } }
+.fade-up { animation: fade-up .4s ease both; }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Thanos dissolve on logout */
+#root.dissolving { pointer-events: none; }

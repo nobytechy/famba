@@ -1,0 +1,9 @@
+{
+  "appId": "co.zw.fambafleet.app",
+  "appName": "Famba Fleet",
+  "webDir": "dist",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "Geolocation": { "permissions": ["location"] }
+  }
+}

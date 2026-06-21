@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: famba-fleet-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # paste in Render dashboard (optional, enables AI insights)
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: ALLOW_CORS_ORIGINS
+        value: "https://famba.netlify.app"
