@@ -5,7 +5,7 @@ const KEY = 'famba_company'
 const DEFAULT_COMPANY = {
   name: 'Famba Logistics',
   email: 'ops@fambafleet.co.zw',
-  phone: '263772110571',
+  phone: '263774603865',
   currency: 'USD',
 }
 

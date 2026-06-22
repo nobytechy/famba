@@ -20,7 +20,7 @@ const FEATURES = [
 
 export default function Landing() {
   const [form, setForm] = useState({ name: '', company: '', message: '' })
-  const WHATSAPP = '263772110571'
+  const WHATSAPP = '263774603865'
 
   const send = (e) => {
     e.preventDefault()
@@ -143,11 +143,11 @@ export default function Landing() {
             <div className="mt-8 space-y-4">
               <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-slate-700 hover:text-teal-700">
                 <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center"><MessageCircle size={20} /></span>
-                WhatsApp · +263 772 110 571
+                WhatsApp · +263 774 603 865
               </a>
-              <a href="tel:+263772110571" className="flex items-center gap-3 text-slate-700 hover:text-teal-700">
+              <a href="tel:+263774603865" className="flex items-center gap-3 text-slate-700 hover:text-teal-700">
                 <span className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 grid place-items-center"><Phone size={20} /></span>
-                +263 772 110 571
+                +263 774 603 865
               </a>
               <a href="mailto:nobytechy@gmail.com" className="flex items-center gap-3 text-slate-700 hover:text-teal-700">
                 <span className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 grid place-items-center"><Mail size={20} /></span>
