@@ -77,6 +77,15 @@ to produce the APK. The committed `android/` folder lets a fresh clone build
 straight away — only `local.properties` (your SDK path) is machine-specific and
 git-ignored.
 
+### No Android Studio? Let CI build it
+
+`.github/workflows/android.yml` builds the debug APK on every push to `main`
+(and on demand from the **Actions** tab → *Android APK* → *Run workflow*). When
+it finishes, download the APK from the run's **Artifacts** →
+`famba-fleet-debug-apk`, then install `app-debug.apk` on the phone (enable
+"install unknown apps" for your browser/file manager). No local JDK or SDK
+needed.
+
 ## White-labelling for each client
 
 Single-tenant by design — per client:
