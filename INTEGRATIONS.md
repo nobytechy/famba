@@ -51,21 +51,31 @@ GEMINI_API_KEY=...          # free tier at https://aistudio.google.com/apikey
 
 ## Native app — true background GPS (Capacitor)
 
-The PWA cannot track GPS when the app is fully closed (OS limitation). To get
-always-on background tracking + background SOS, wrap the same build with
-Capacitor:
+The PWA cannot track GPS when the app is fully closed (OS limitation). The
+Android Capacitor project is **already wired and generated** (`android/`):
+
+- The driver portal calls `startTracking()` in `src/lib/tracking.js`, which
+  uses `@capacitor-community/background-geolocation` on a native build (keeps
+  streaming when the app is minimised or closed) and falls back to the
+  browser's `watchPosition` on the web — same `{latitude,longitude,speed}`
+  callback shape either way.
+- `capacitor.config.json` sets `android.useLegacyBridge: true` so background
+  updates don't halt after 5 minutes.
+- The background-geolocation plugin contributes the foreground-service +
+  location / `FOREGROUND_SERVICE_LOCATION` / `POST_NOTIFICATIONS` permissions
+  via manifest merging — nothing to add by hand.
+
+Build / refresh the native app after any web change:
 
 ```bash
-npm i @capacitor/core @capacitor/cli @capacitor/geolocation
-npm i @capacitor-community/background-geolocation
-npx cap init        # config already provided in capacitor.config.json
-npm run build && npx cap add android && npx cap sync
-npx cap open android
+npm run mobile        # vite build + cap sync android
+npm run mobile:open   # same, then opens Android Studio (needs JDK + Android SDK)
 ```
 
-Then swap the driver portal's `navigator.geolocation.watchPosition` for the
-background-geolocation plugin (same lat/lng/speed shape) so tracking continues
-with the app backgrounded or closed.
+Then **Run** from Android Studio (or `./gradlew assembleDebug` in `android/`)
+to produce the APK. The committed `android/` folder lets a fresh clone build
+straight away — only `local.properties` (your SDK path) is machine-specific and
+git-ignored.
 
 ## White-labelling for each client
 

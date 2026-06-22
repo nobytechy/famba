@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Famba Fleet</string>
+    <string name="title_activity_main">Famba Fleet</string>
+    <string name="package_name">co.zw.fambafleet.app</string>
+    <string name="custom_url_scheme">co.zw.fambafleet.app</string>
+</resources>
