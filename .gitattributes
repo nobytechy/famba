@@ -1,0 +1,3 @@
+# Keep the Gradle wrapper script LF so the Android build works on macOS/Linux/CI.
+gradlew text eol=lf
+*.sh text eol=lf
