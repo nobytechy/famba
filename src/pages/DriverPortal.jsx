@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext'
 import { useStore } from '../lib/store.jsx'
 import { API_BASE } from '../lib/supabase'
 import { publishAlert } from '../lib/alerts'
+import { startTracking } from '../lib/tracking'
 import { thanosSnap, thanosRestore } from '../lib/thanos'
 import { FAULT_CATEGORIES, SEVERITIES, EMERGENCY_CONTACTS } from '../lib/seed'
 
@@ -77,17 +78,15 @@ export default function DriverPortal() {
     return () => { document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', onHide) }
   }, [])
 
-  useEffect(() => () => { if (watch.current != null) navigator.geolocation.clearWatch(watch.current); releaseWakeLock() }, [])
+  useEffect(() => () => { if (watch.current) watch.current.stop(); releaseWakeLock() }, [])
 
-  const start = () => {
-    if (!navigator.geolocation) return setErr('This phone/browser has no GPS access.')
+  const start = async () => {
     setErr(''); setDist(0); setPings(0); last.current = null
     const id = startTrip(user.driver_id, vehicleId)
     setTripId(id); setOn(true); onRef.current = true; acquireWakeLock()
     toast.success('Trip started — you are now live')
-    watch.current = navigator.geolocation.watchPosition(
-      (p) => {
-        const { latitude, longitude, speed } = p.coords
+    watch.current = await startTracking(
+      ({ latitude, longitude, speed }) => {
         const kmh = speed ? speed * 3.6 : 0
         const here = [latitude, longitude]
         if (last.current) setDist((d) => d + haversine(last.current, here))
@@ -97,12 +96,11 @@ export default function DriverPortal() {
         if (API_BASE) fetch(`${API_BASE}/api/ingest`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ vehicle_id: vehicleId, lat: latitude, lng: longitude, speed_kmh: kmh }) }).catch(() => {})
       },
-      (e) => setErr(e.message || 'Location permission denied'),
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 },
+      (e) => setErr(e?.message || 'Location permission denied'),
     )
   }
   const stopTracking = () => {
-    if (watch.current != null) navigator.geolocation.clearWatch(watch.current)
+    if (watch.current) watch.current.stop()
     watch.current = null; setOn(false); onRef.current = false; releaseWakeLock()
   }
   const finish = (payload) => {

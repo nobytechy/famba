@@ -37,4 +37,7 @@ export default defineConfig({
     }),
   ],
   server: { port: 5182, host: true },
+  // Native-only Capacitor plugin: keep it out of the web bundle. It is loaded via
+  // a dynamic import that only runs on a native build, where Capacitor resolves it.
+  build: { rollupOptions: { external: ['@capacitor-community/background-geolocation'] } },
 })
