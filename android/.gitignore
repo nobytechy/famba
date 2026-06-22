@@ -90,7 +90,9 @@ lint/tmp/
 *.hprof
 
 # Cordova plugins for Capacitor
-capacitor-cordova-android-plugins
+# NOTE: kept in git on purpose — `cap sync` reads its build.gradle and
+# settings.gradle includes it as a module, so CI needs it on a fresh checkout.
+# capacitor-cordova-android-plugins
 
 # Copied web assets
 app/src/main/assets/public
