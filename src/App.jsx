@@ -7,6 +7,7 @@ import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Dispatch from './pages/Dispatch.jsx'
 import Vehicles from './pages/Vehicles.jsx'
+import Skips from './pages/Skips.jsx'
 import Fuel from './pages/Fuel.jsx'
 import Compliance from './pages/Compliance.jsx'
 import Drivers from './pages/Drivers.jsx'
@@ -50,6 +51,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="dispatch" element={<Dispatch />} />
         <Route path="vehicles" element={<Vehicles />} />
+        <Route path="skips" element={<Skips />} />
         <Route path="fuel" element={<Fuel />} />
         <Route path="compliance" element={<Compliance />} />
         <Route path="drivers" element={<Drivers />} />

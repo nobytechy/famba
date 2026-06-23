@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Truck, Send, Fuel, ShieldCheck, Users, BarChart3,
+  LayoutDashboard, Truck, Container, Send, Fuel, ShieldCheck, Users, BarChart3,
   Wrench, UserCog, Wallet, LineChart, FileText, Banknote, Settings as SettingsIcon, LogOut, Menu, X,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -16,6 +16,7 @@ const NAV = [
   { to: '/app', label: 'Dashboard', icon: LayoutDashboard, end: true, roles: ['admin', 'operator', 'staff'] },
   { to: '/app/dispatch', label: 'Dispatch', icon: Send, roles: ['admin', 'operator'] },
   { to: '/app/vehicles', label: 'Vehicles', icon: Truck, roles: ['admin', 'operator', 'staff'] },
+  { to: '/app/skips', label: 'Skips', icon: Container, roles: ['admin', 'operator', 'staff'] },
   { to: '/app/fuel', label: 'Fuel', icon: Fuel, roles: ['admin', 'operator'] },
   { to: '/app/compliance', label: 'Compliance', icon: ShieldCheck, roles: ['admin', 'operator'] },
   { to: '/app/faults', label: 'Faults', icon: Wrench, roles: ['admin', 'operator', 'staff'] },

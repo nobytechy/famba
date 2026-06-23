@@ -201,6 +201,71 @@ async def insights(s: FleetSummary):
     return {**_fallback_insight(s), "source": "fallback"}
 
 
+class SkipSummary(BaseModel):
+    total_skips: int = 0
+    in_yard: int = 0
+    on_site: int = 0
+    overdue_skips: int = 0
+    demurrage_at_risk_usd: int = 0
+    idle_ratio: int = 0
+
+
+def _fallback_skip_insight(s: SkipSummary) -> dict:
+    return {
+        "narrative": (
+            f"Of {s.total_skips} skips, {s.overdue_skips} are past their free rental period — that's "
+            f"${s.demurrage_at_risk_usd:,} in demurrage billable today. Meanwhile {s.in_yard} skip(s) sit idle "
+            f"in the yard ({s.idle_ratio}% of the fleet) earning nothing; redeploying those lifts utilisation fastest."
+        ),
+        "savings_usd": int(s.demurrage_at_risk_usd * 4),
+        "actions": [
+            f"Invoice demurrage on {s.overdue_skips} over-rental skip(s) before collection."
+            if s.overdue_skips else "No skips over rental — billing is current.",
+            f"Deploy {s.in_yard} idle skip(s) to push utilisation above 80%."
+            if s.in_yard else "Yard is empty — every skip is earning.",
+            "Cluster collections by area to cut truck fuel and turnaround time.",
+        ],
+    }
+
+
+async def _gemini_skip_insight(s: SkipSummary) -> Optional[dict]:
+    prompt = (
+        "You are a waste / skip-hire operations analyst in Zimbabwe. Given this skip-fleet status JSON, write a "
+        "concise revenue-focused insight for the operations manager. Return STRICT JSON with keys: narrative "
+        "(string, 2-3 sentences on demurrage recovery and idle-skip utilisation), savings_usd (integer, estimated "
+        "annual value protected) and actions (array of 3 short imperative strings). "
+        f"Skip status: {s.model_dump_json()}"
+    )
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+        f"?key={GEMINI_KEY}"
+    )
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.4, "responseMimeType": "application/json"},
+    }
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            r = await client.post(url, json=body)
+            r.raise_for_status()
+            text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            import json
+            data = json.loads(text)
+            data["source"] = "ai"
+            return data
+    except Exception:
+        return None
+
+
+@app.post("/api/skips-insight")
+async def skips_insight(s: SkipSummary):
+    if GEMINI_KEY:
+        ai = await _gemini_skip_insight(s)
+        if ai:
+            return ai
+    return {**_fallback_skip_insight(s), "source": "fallback"}
+
+
 # --------------------------------------------------------------- messaging ---
 # All three degrade gracefully: if the provider keys aren't set they return
 # {sent: false, reason: "..."} so the app keeps working (e.g. via wa.me links).

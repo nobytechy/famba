@@ -66,6 +66,20 @@ create table if not exists famba_maintenance (
   last_service_date    date
 );
 
+-- Skips — the steel waste containers hired out (waste / skip-hire vertical).
+-- Tracked through their lifecycle; dwell time vs free_days drives demurrage.
+create table if not exists famba_skips (
+  id           text primary key,
+  code         text not null,            -- skip number, e.g. SKP-01
+  size         text,                     -- 6 m³ | 8 m³ | 12 m³ | 14 m³
+  status       text default 'In Yard',   -- In Yard | Deployed | Full | In Transit
+  client       text,
+  site         text,
+  deployed_at  date,                     -- when dropped at site (starts dwell clock)
+  daily_rate   numeric default 8,        -- rental $/day
+  free_days    int default 3             -- included days before demurrage
+);
+
 -- Live GPS pings from the driver phone app (the backend also keeps these).
 create table if not exists famba_pings (
   id          bigint generated always as identity primary key,
@@ -179,7 +193,7 @@ declare t text;
 begin
   foreach t in array array[
     'famba_drivers','famba_vehicles','famba_jobs','famba_fuel_logs',
-    'famba_compliance','famba_maintenance','famba_pings',
+    'famba_compliance','famba_maintenance','famba_skips','famba_pings',
     'famba_staff','famba_trips','famba_fault_reports','famba_alerts','famba_expenses','famba_invoices'
   ] loop
     execute format('alter table %I enable row level security', t);
@@ -251,6 +265,22 @@ insert into famba_maintenance (id, vehicle_id, service_interval_km, last_service
   ('mnt-4','veh-4',10000,135770, current_date - 38),
   ('mnt-5','veh-5',10000, 49740, current_date - 12)
 on conflict (id) do update set last_service_odo=excluded.last_service_odo, last_service_date=excluded.last_service_date;
+
+-- Skips: a mix of idle (yard), deployed within free period, and over-rental
+-- (demurrage) so the revenue insight has something to recover.
+insert into famba_skips (id, code, size, status, client, site, deployed_at, daily_rate, free_days) values
+  ('skip-1','SKP-01','6 m³', 'Deployed',  'Halsted Builders',  'Borrowdale — Pomona build', current_date - 9,  8,  3),
+  ('skip-2','SKP-02','8 m³', 'Full',      'Avondale Hardware', 'Avondale — shop refit',     current_date - 5,  9,  3),
+  ('skip-3','SKP-03','12 m³','Deployed',  'Delta Beverages',   'Graniteside depot',         current_date - 2,  12, 5),
+  ('skip-4','SKP-04','6 m³', 'In Yard',   null, null, null, 8,  3),
+  ('skip-5','SKP-05','8 m³', 'In Yard',   null, null, null, 9,  3),
+  ('skip-6','SKP-06','14 m³','Full',      'City of Harare',    'Workington factory yard',   current_date - 11, 14, 5),
+  ('skip-7','SKP-07','12 m³','In Transit','OK Mart',           'Chitungwiza — Unit L',      current_date - 1,  12, 5),
+  ('skip-8','SKP-08','6 m³', 'Deployed',  'Mr Chideya',        'Mt Pleasant residence',     current_date - 4,  6,  7),
+  ('skip-9','SKP-09','8 m³', 'In Yard',   null, null, null, 9,  3)
+on conflict (id) do update set
+  status=excluded.status, client=excluded.client, site=excluded.site,
+  deployed_at=excluded.deployed_at, daily_rate=excluded.daily_rate, free_days=excluded.free_days;
 
 -- Fuel logs: a healthy spread plus one deliberate anomaly on veh-3 (theft demo).
 insert into famba_fuel_logs (id, vehicle_id, date, litres, odo_km, cost_usd, kmpl) values

@@ -31,6 +31,7 @@ work a transport operator does every day.
 | **Dashboard** | Live fleet map + every open alert at a glance |
 | **Dispatch** | Assign vehicle & driver, move jobs to delivery, notify clients on WhatsApp |
 | **Vehicles** | Fuel level, mileage and service health per vehicle |
+| **Skips** | Waste / skip-hire asset lifecycle — yard → site → landfill, with automatic demurrage (over-rental) flags + AI revenue insight |
 | **Fuel** | km/litre analysis with automatic anomaly flags |
 | **Compliance** | ZINARA / ZIMRA / insurance / fitness expiry alerts + WhatsApp reminders |
 | **Drivers** | Roster, performance scores, licence status |

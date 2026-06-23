@@ -74,9 +74,9 @@ export function StoreProvider({ children }) {
     ;(async () => {
       try {
         const tbl = (n) => supabase.from(`famba_${n}`).select('*')
-        const [veh, drv, job, fuel, comp, mnt, stf, trp, flt, exp, inv] = await Promise.all([
+        const [veh, drv, job, fuel, comp, mnt, stf, trp, flt, exp, inv, skp] = await Promise.all([
           tbl('vehicles'), tbl('drivers'), tbl('jobs'), tbl('fuel_logs'), tbl('compliance'), tbl('maintenance'),
-          tbl('staff'), tbl('trips'), tbl('fault_reports'), tbl('expenses'), tbl('invoices'),
+          tbl('staff'), tbl('trips'), tbl('fault_reports'), tbl('expenses'), tbl('invoices'), tbl('skips'),
         ])
         if (!alive) return
         if (veh.error || !veh.data?.length) { setSource('demo'); setLoading(false); return }
@@ -93,6 +93,7 @@ export function StoreProvider({ children }) {
           fuel_logs: fuel.data || seed.fuel_logs,
           compliance: comp.data || seed.compliance,
           maintenance: mnt.data || seed.maintenance,
+          skips: skp.data?.length ? skp.data : seed.skips,
           clients: seed.clients,
           staff: stf.data?.length ? stf.data : seed.staff,
           trips: trp.data || seed.trips,
@@ -214,6 +215,49 @@ export function StoreProvider({ children }) {
     })
   }, [persist])
 
+  // ---- skips (waste asset lifecycle) ---------------------------------------
+  const skipRow = (sk) => ({ id: sk.id, code: sk.code, size: sk.size, status: sk.status, client: sk.client, site: sk.site, deployed_at: sk.deployed_at, daily_rate: sk.daily_rate, free_days: sk.free_days })
+
+  const addSkip = useCallback((skip) => {
+    setData((d) => {
+      const row = { id: `skip-${Date.now()}`, status: 'In Yard', client: null, site: null, deployed_at: null, daily_rate: 8, free_days: 3, ...skip }
+      persist('skips', skipRow(row))
+      return { ...d, skips: [row, ...(d.skips || [])] }
+    })
+  }, [persist])
+
+  // Drop an empty skip at a customer site — starts the rental/dwell clock.
+  const deploySkip = useCallback((id, { client, site, daily_rate, free_days }) => {
+    setData((d) => {
+      const skips = (d.skips || []).map((sk) => sk.id === id ? {
+        ...sk, status: 'Deployed', client, site,
+        daily_rate: Number(daily_rate) || sk.daily_rate, free_days: Number(free_days) ?? sk.free_days,
+        deployed_at: new Date().toISOString().slice(0, 10),
+      } : sk)
+      persist('skips', skipRow(skips.find((sk) => sk.id === id)))
+      return { ...d, skips }
+    })
+  }, [persist])
+
+  const markSkipFull = useCallback((id) => {
+    setData((d) => {
+      const skips = (d.skips || []).map((sk) => sk.id === id ? { ...sk, status: 'Full' } : sk)
+      persist('skips', { id, status: 'Full' })
+      return { ...d, skips }
+    })
+  }, [persist])
+
+  // Collect the skip — haul waste to the landfill and return it to the yard.
+  const collectSkip = useCallback((id) => {
+    setData((d) => {
+      const skips = (d.skips || []).map((sk) => sk.id === id ? {
+        ...sk, status: 'In Yard', client: null, site: null, deployed_at: null,
+      } : sk)
+      persist('skips', skipRow(skips.find((sk) => sk.id === id)))
+      return { ...d, skips }
+    })
+  }, [persist])
+
   // ---- staff / users -------------------------------------------------------
   const saveStaff = useCallback((member) => {
     setData((d) => {
@@ -320,6 +364,7 @@ export function StoreProvider({ children }) {
       assignJob, setJobStatus, savePOD, addFuelLog, addCompliance, postPing,
       saveStaff, toggleStaff, startTrip, endTrip, setFaultStatus, addExpense, updateDriver,
       addInvoice, setInvoiceStatus,
+      addSkip, deploySkip, markSkipFull, collectSkip,
     }}>
       {children}
     </StoreCtx.Provider>
@@ -346,6 +391,20 @@ export function fuelAnomalies(fuel_logs, vehicles) {
     })
     .filter((f) => f.flagged)
     .sort((a, b) => a.ratio - b.ratio)
+}
+
+// Skip dwell-time + demurrage. A deployed skip earns until its free days run
+// out; after that every extra day is billable demurrage that's usually missed.
+export function skipInsights(skips = []) {
+  const now = new Date()
+  return skips.map((sk) => {
+    const onSite = sk.status !== 'In Yard' && sk.deployed_at
+    const dwell = onSite ? Math.max(0, differenceInCalendarDays(now, parseISO(sk.deployed_at))) : 0
+    const free = sk.free_days ?? 3
+    const overdue = onSite ? Math.max(0, dwell - free) : 0
+    const demurrage = Math.round(overdue * (sk.daily_rate || 0))
+    return { ...sk, dwell, overdue, demurrage, flagged: overdue > 0 }
+  }).sort((a, b) => b.overdue - a.overdue || b.dwell - a.dwell)
 }
 
 export function maintenanceDue(maintenance, vehicles) {

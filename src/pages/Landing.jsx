@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   MapPin, ShieldCheck, Fuel, Send, Smartphone, BarChart3, MessageCircle,
-  Mail, Phone, ArrowRight, CheckCircle2,
+  Mail, Phone, ArrowRight, CheckCircle2, Container, Recycle, TrendingUp, Warehouse,
 } from 'lucide-react'
 import Logo from '../components/Logo.jsx'
 import WaveDivider from '../components/WaveDivider.jsx'
@@ -36,6 +36,7 @@ export default function Landing() {
           <Logo />
           <nav className="flex items-center gap-6 text-sm">
             <a href="#features" className="hidden sm:inline text-slate-600 hover:text-teal-700">Features</a>
+            <a href="#waste" className="hidden sm:inline text-slate-600 hover:text-teal-700">Skip hire</a>
             <a href="#how" className="hidden sm:inline text-slate-600 hover:text-teal-700">How it works</a>
             <a href="#contact" className="hidden sm:inline text-slate-600 hover:text-teal-700">Contact</a>
             <Link to="/login" className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-lg btn-press shadow-sm">Sign in</Link>
@@ -105,6 +106,61 @@ export default function Landing() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Waste / skip-hire vertical */}
+      <section id="waste" className="bg-gradient-to-br from-slate-900 to-teal-900 text-white">
+        <div className="max-w-6xl mx-auto px-5 py-20 grid lg:grid-cols-2 gap-12 items-center">
+          <Reveal>
+            <div>
+              <span className="inline-flex items-center gap-1.5 bg-white/10 text-teal-200 text-xs font-semibold px-3 py-1 rounded-full">
+                <Recycle size={14} /> Waste &amp; skip hire
+              </span>
+              <h2 className="mt-4 text-3xl font-bold leading-tight">Hiring out skips? Track the container, not just the truck.</h2>
+              <p className="mt-4 text-slate-300">
+                A skip earns money while it sits at a customer site — and quietly loses it when it overstays or sits idle in
+                the yard. Famba tracks every skip through its lifecycle and turns those movements into revenue you can bill.
+              </p>
+              <div className="mt-7 space-y-4">
+                {[
+                  [Container, 'Full lifecycle tracking', 'Every skip followed from yard → site → landfill → back, with live status and days-on-site.'],
+                  [TrendingUp, 'Demurrage you can recover', 'Skips past their free rental period are flagged automatically — bill the extra days you were missing.'],
+                  [Warehouse, 'Lift utilisation', 'See idle skips sitting in the yard earning nothing and push them out to lift fleet utilisation.'],
+                  [BarChart3, 'AI revenue insight', 'One tap turns skip movements into a plain-English case: demurrage to recover and smarter collection runs.'],
+                ].map(([Icon, t, d], i) => (
+                  <div key={t} className="flex gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-white/10 grid place-items-center shrink-0"><Icon size={18} className="text-teal-300" /></div>
+                    <div><div className="font-semibold">{t}</div><div className="text-sm text-slate-300">{d}</div></div>
+                  </div>
+                ))}
+              </div>
+              <Link to="/login" className="mt-8 inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-6 py-3 rounded-xl btn-press">
+                See the Skips board <ArrowRight size={18} />
+              </Link>
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-2xl">
+              <div className="text-xs text-teal-200 uppercase tracking-wide">Demurrage to recover this month</div>
+              <div className="text-4xl font-extrabold mt-1">$1,240</div>
+              <div className="mt-5 space-y-2">
+                {[
+                  ['SKP-06 · 14 m³', 'Workington factory', '+$84', true],
+                  ['SKP-01 · 6 m³', 'Borrowdale build', '+$48', true],
+                  ['SKP-03 · 12 m³', 'Graniteside depot', '2 free days left', false],
+                  ['SKP-04 · 8 m³', 'In yard — available', 'idle', false],
+                ].map(([code, site, val, flag]) => (
+                  <div key={code} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
+                    <Container size={16} className={flag ? 'text-rose-300' : 'text-slate-400'} />
+                    <div className="min-w-0"><div className="text-sm font-medium truncate">{code}</div><div className="text-[11px] text-slate-400 truncate">{site}</div></div>
+                    <span className={`ml-auto text-xs font-semibold ${flag ? 'text-rose-300' : 'text-slate-400'}`}>{val}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-[11px] text-slate-400">Illustrative — live figures come from your own skips.</div>
+            </div>
+          </Reveal>
         </div>
       </section>
 

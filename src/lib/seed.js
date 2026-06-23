@@ -145,6 +145,38 @@ function makeMaintenance() {
   }))
 }
 
+// --- skips (waste / skip-hire asset lifecycle) ------------------------------
+// A "skip" is the steel waste container the company hires out. Unlike a vehicle,
+// it earns (or leaks) money while sitting at a customer site — so each one is
+// tracked through its lifecycle and its dwell time drives demurrage billing.
+export const SKIP_SIZES = ['6 m³', '8 m³', '12 m³', '14 m³']
+export const SKIP_STATUSES = ['In Yard', 'Deployed', 'Full', 'In Transit']
+
+function makeSkips() {
+  const rows = [
+    { code: 'SKP-01', size: '6 m³',  status: 'Deployed',   client: 'Halsted Builders',  site: 'Borrowdale — Pomona build',  d: 9,  rate: 8,  free: 3 },
+    { code: 'SKP-02', size: '8 m³',  status: 'Full',       client: 'Avondale Hardware', site: 'Avondale — shop refit',      d: 5,  rate: 9,  free: 3 },
+    { code: 'SKP-03', size: '12 m³', status: 'Deployed',   client: 'Delta Beverages',   site: 'Graniteside depot',          d: 2,  rate: 12, free: 5 },
+    { code: 'SKP-04', size: '6 m³',  status: 'In Yard',    client: null, site: null, d: 0, rate: 8,  free: 3 },
+    { code: 'SKP-05', size: '8 m³',  status: 'In Yard',    client: null, site: null, d: 0, rate: 9,  free: 3 },
+    { code: 'SKP-06', size: '14 m³', status: 'Full',       client: 'City of Harare',    site: 'Workington factory yard',    d: 11, rate: 14, free: 5 },
+    { code: 'SKP-07', size: '12 m³', status: 'In Transit', client: 'OK Mart',           site: 'Chitungwiza — Unit L',       d: 1,  rate: 12, free: 5 },
+    { code: 'SKP-08', size: '6 m³',  status: 'Deployed',   client: 'Mr Chideya',        site: 'Mt Pleasant residence',      d: 4,  rate: 6,  free: 7 },
+    { code: 'SKP-09', size: '8 m³',  status: 'In Yard',    client: null, site: null, d: 0, rate: 9,  free: 3 },
+  ]
+  return rows.map((r, i) => ({
+    id: `skip-${i + 1}`,
+    code: r.code,
+    size: r.size,
+    status: r.status,
+    client: r.client,
+    site: r.site,
+    deployed_at: r.status === 'In Yard' ? null : iso(subDays(today, r.d)),
+    daily_rate: r.rate,
+    free_days: r.free,
+  }))
+}
+
 export function buildSeed() {
   return {
     drivers: DRIVERS.map((d) => ({ ...d })),
@@ -161,6 +193,7 @@ export function buildSeed() {
     fuel_logs: makeFuelLogs(),
     compliance: makeCompliance(),
     maintenance: makeMaintenance(),
+    skips: makeSkips(),
     clients: CLIENTS.map((name, i) => ({ id: `cl-${i + 1}`, name })),
     staff: STAFF.map((s) => ({ ...s })),
     trips: makeTrips(),
