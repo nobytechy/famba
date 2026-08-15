@@ -60,3 +60,9 @@ feature walkthrough.
 ---
 
 Built by [Noby Tebulo](https://nobie.netlify.app) · nobytechy@gmail.com
+
+## Screenshots
+
+![famba-fleet](docs/screenshots/famba-fleet.jpg)
+
+**Live:** https://fambah.netlify.app · Built by [Noby Tebulo](https://nobie.netlify.app)
